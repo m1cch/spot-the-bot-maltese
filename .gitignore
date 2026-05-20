@@ -1,0 +1,45 @@
+# --- данные (слишком большие для git) ---
+corpus_raw/
+corpus_clean/
+corpus_clean_L1/
+corpus_clean_L2/
+corpus_clean_L3/
+corpus_bot/
+embeddings/
+datasets/
+models/
+logs/
+_export/
+for_kogan/
+resources/
+viz/
+
+# --- окружение ---
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# --- крупные бинарники ---
+*.bin
+*.npy
+*.npz
+*.pt
+*.pth
+*.pkl
+*.h5
+
+# --- системный мусор macOS ---
+.DS_Store
+._*
+
+# --- сборка LaTeX ---
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.synctex.gz
+
+# приложение с кодом генерируется отдельно для сдачи
+submission_code_appendix.txt
