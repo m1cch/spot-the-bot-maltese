@@ -1,0 +1,78 @@
+{
+  "params": {
+    "k": 11,
+    "h": 0.2,
+    "sample": 30000
+  },
+  "human": {
+    "n_points": 30000,
+    "n_clusters": 236,
+    "noise_points": 23503,
+    "noise_fraction": 0.7834333333333333,
+    "cluster_sizes": [
+      352,
+      186,
+      159,
+      153,
+      132,
+      122,
+      119,
+      117,
+      113,
+      104,
+      85,
+      82,
+      79,
+      79,
+      75,
+      73,
+      73,
+      73,
+      73,
+      72
+    ],
+    "largest_cluster_frac": 0.011733333333333333,
+    "silhouette": 0.3759296238422394,
+    "davies_bouldin": 1.00448110815821,
+    "calinski_harabasz": 209.7133283180369,
+    "elapsed_sec": 1.7585515975952148
+  },
+  "bot": {
+    "n_points": 30000,
+    "n_clusters": 246,
+    "noise_points": 23900,
+    "noise_fraction": 0.7966666666666666,
+    "cluster_sizes": [
+      141,
+      139,
+      129,
+      116,
+      101,
+      98,
+      98,
+      96,
+      87,
+      87,
+      85,
+      84,
+      82,
+      81,
+      80,
+      78,
+      78,
+      78,
+      72,
+      71
+    ],
+    "largest_cluster_frac": 0.0047,
+    "silhouette": 0.3623952567577362,
+    "davies_bouldin": 1.1192108618665715,
+    "calinski_harabasz": 361.04020126695804,
+    "elapsed_sec": 1.0670440196990967
+  },
+  "comparison": {
+    "delta_n_clusters": 10,
+    "delta_noise_fraction": 0.01323333333333332,
+    "delta_silhouette": -0.013534367084503174
+  }
+}

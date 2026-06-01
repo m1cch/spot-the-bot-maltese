@@ -1,0 +1,119 @@
+{
+  "params": {
+    "human": "datasets/human__n4_m8.npy",
+    "bot": "datasets/bot__n4_m8.npy",
+    "points": 2000,
+    "runs": 5,
+    "maxdim": 1,
+    "min_persistence": 0.0,
+    "seed": 42
+  },
+  "human": {
+    "H0": {
+      "betti": {
+        "mean": 1998.0,
+        "std": 0.8944271909999159
+      },
+      "total_persistence": {
+        "mean": 2819.4536633077546,
+        "std": 17.159181630015176
+      },
+      "max_persistence": {
+        "mean": 10.944499397277832,
+        "std": 1.3244148938716653
+      },
+      "mean_persistence": {
+        "mean": 1.411140792990605,
+        "std": 0.009017887494661838
+      },
+      "persistence_entropy": {
+        "mean": 7.419307623957553,
+        "std": 0.00797744289922175
+      }
+    },
+    "H1": {
+      "betti": {
+        "mean": 1156.8,
+        "std": 8.49470423263812
+      },
+      "total_persistence": {
+        "mean": 132.30346972793342,
+        "std": 3.5914307865610375
+      },
+      "max_persistence": {
+        "mean": 1.4988840103149415,
+        "std": 0.5683470843021915
+      },
+      "mean_persistence": {
+        "mean": 0.1143780534082286,
+        "std": 0.003290277840731228
+      },
+      "persistence_entropy": {
+        "mean": 6.562999489310933,
+        "std": 0.011382180402770333
+      }
+    }
+  },
+  "bot": {
+    "H0": {
+      "betti": {
+        "mean": 1993.0,
+        "std": 2.6832815729997477
+      },
+      "total_persistence": {
+        "mean": 3051.011373785047,
+        "std": 28.153455932352212
+      },
+      "max_persistence": {
+        "mean": 10.994754028320312,
+        "std": 1.400328904494267
+      },
+      "mean_persistence": {
+        "mean": 1.53085159694589,
+        "std": 0.012573558027349
+      },
+      "persistence_entropy": {
+        "mean": 7.443917900219918,
+        "std": 0.0065467993554722105
+      }
+    },
+    "H1": {
+      "betti": {
+        "mean": 1234.2,
+        "std": 28.47735942814923
+      },
+      "total_persistence": {
+        "mean": 159.02119934558868,
+        "std": 3.6835710270931297
+      },
+      "max_persistence": {
+        "mean": 2.389718246459961,
+        "std": 0.28572055734474144
+      },
+      "mean_persistence": {
+        "mean": 0.1289068486173537,
+        "std": 0.004007340325677411
+      },
+      "persistence_entropy": {
+        "mean": 6.5888965471183925,
+        "std": 0.029396220031524308
+      }
+    }
+  },
+  "comparison": {
+    "H0": {
+      "betti": -5.0,
+      "total_persistence": 231.5577104772924,
+      "max_persistence": 0.0502546310424794,
+      "mean_persistence": 0.119710803955285,
+      "persistence_entropy": 0.024610276262365005
+    },
+    "H1": {
+      "betti": 77.40000000000009,
+      "total_persistence": 26.717729617655266,
+      "max_persistence": 0.8908342361450197,
+      "mean_persistence": 0.01452879520912509,
+      "persistence_entropy": 0.025897057807459767
+    }
+  }
+}
