@@ -52,7 +52,6 @@ corpus_bot/         # сгенерированные LSTM тексты
 embeddings/         # svd / fasttext / word2vec
 datasets/           # n-граммные датасеты
 models/             # обученные модели (LSTM)
-results/            # графики, метрики
 scripts/            # рабочие скрипты
 results/            # метрики (json) и графики
 paper/              # сама курсовая (tex + pdf)
