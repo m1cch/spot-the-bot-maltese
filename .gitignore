@@ -1,5 +1,6 @@
 # --- данные (слишком большие для git) ---
 corpus_raw/
+corpus_clean
 corpus_clean/
 corpus_clean_L1/
 corpus_clean_L2/
@@ -41,5 +42,12 @@ paper/*.out
 paper/*.toc
 paper/*.synctex.gz
 
-# приложение с кодом генерируется отдельно для сдачи
+# методичка лаборатории (сторонний материал)
+docs/
+
+# артефакты, генерируемые только для сдачи
+submission/
 submission_code_appendix.txt
+paper/title.tex
+paper/title.pdf
+paper/coursework_ru.tex
