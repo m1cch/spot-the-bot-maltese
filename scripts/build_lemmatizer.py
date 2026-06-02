@@ -25,10 +25,12 @@ ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "resources"
 OUT_JSON = RES / "mt_lemma_lookup.json"
 
+
 def iter_bson(path: Path):
     """Потоково парсим BSON dump (один документ за раз)."""
     with open(path, "rb") as f:
         data = f.read()
+
     # bson.decode_file_iter не работает для concatenated dump; используем offset-парсинг
     offset = 0
     n = len(data)
@@ -43,6 +45,7 @@ def iter_bson(path: Path):
             offset += size; continue
         yield doc
         offset += size
+
 
 def main():
     t0 = time.time()
@@ -73,6 +76,7 @@ def main():
         if not info:
             n_no_lexeme += 1; continue
         lemma, freq = info
+
         # нижний регистр для регистронечувствительного lookup
         key = surf.lower()
         prev = lookup.get(key)
@@ -109,6 +113,7 @@ def main():
     print("\nDemo lookups:")
     for w in ["kitba", "ġurnata", "qieghed", "tieghi", "bnedem", "kitbu"]:
         print(f"  {w} -> {flat.get(w.lower(), '?')}")
+
 
 if __name__ == "__main__":
     main()

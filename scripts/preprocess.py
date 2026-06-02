@@ -65,20 +65,25 @@ POS_DROP = {"PUNCT", "SYM", "X", "SPACE"}
 # Регулярка для отсеивания мусора в лемме
 ALPHANUM_MT = re.compile(r"[a-zA-Z0-9ċġħżĊĠĦŻ\-']+")
 
+
 def normalize_lemma(lemma: str) -> str:
     if not lemma:
         return ""
     lemma = lemma.lower().strip()
+
     # отбрасываем явный мусор
     if not lemma or len(lemma) > 40:
         return ""
+
     # должно содержать хоть одну букву/цифру
     if not ALPHANUM_MT.search(lemma):
         return ""
     return lemma
 
+
 # Глобальный nlp в воркере
 _NLP = None
+
 
 def _init_worker():
     global _NLP
@@ -89,6 +94,7 @@ def _init_worker():
         verbose=False,
         download_method=None,
     )
+
 
 def _process_one(args):
     """Обрабатывает один файл. Возвращает (source, name, clean_text, n_words) или None."""
@@ -101,6 +107,7 @@ def _process_one(args):
     text = text.strip()
     if not text:
         return None
+
     # Stanza не любит сверхдлинные тексты — режем по 30k символов на пайплайн-инпут
     chunks = []
     MAX = 30000
@@ -137,6 +144,7 @@ def _process_one(args):
         return None
     return (source, Path(filepath).stem, " ".join(out_words), len(out_words))
 
+
 def collect_files():
     plan = []
     for sect, cap in SECTIONS_PRIORITY:
@@ -154,6 +162,7 @@ def collect_files():
             plan.append((section_name, str(fp)))
         print(f"  {sect:25s} -> {len(files)} files")
     return plan
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -189,11 +198,14 @@ def main():
             if res is None:
                 continue
             source, name, clean, nw = res
+
             # сохраняем поштучно
             out_p = CLEAN / source / f"{name}.txt"
             out_p.write_text(clean, encoding="utf-8")
+
             # единый файл (строка = один текст)
             fall.write(clean.replace("\n", " ") + "\n")
+
             # индекс
             findex.write(f"{source}\t{name}\t{nw}\n")
             n_done += 1
@@ -202,6 +214,7 @@ def main():
     elapsed = time.time() - t0
     print(f"\nDone. Files: {n_done}, words(cleaned): {n_words_total}, elapsed: {elapsed/60:.1f} min")
     print(f"Output: {CLEAN}")
+
 
 if __name__ == "__main__":
     main()

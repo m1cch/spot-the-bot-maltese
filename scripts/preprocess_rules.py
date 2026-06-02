@@ -99,6 +99,7 @@ ALPHA_MT_FULL = re.compile(r"^[a-zA-ZċġħżĊĠĦŻ][a-zA-ZċġħżĊĠĦŻ\-'
 # (мы будем токенизировать без сохранения границ предложений, поэтому возьмём упрощённый вариант:
 #  токены с заглавной первой буквой, кроме первого в строке)
 
+
 def strip_clitics(word: str) -> str:
     """Снять артикли и проклитики (один раз)."""
     wl = word.lower()
@@ -110,6 +111,7 @@ def strip_clitics(word: str) -> str:
             return word[len(p):]
     return word
 
+
 def strip_suffix(word: str) -> str:
     """Снять суффикс если он отделён дефисом (`ktieb-na` → `ktieb`).
     Не трогает естественные окончания типа `mammiferu`."""
@@ -119,6 +121,7 @@ def strip_suffix(word: str) -> str:
             return word[: -len(s)]
     return word
 
+
 def rule_lemma(token: str) -> str:
     """Lemma по правилам: снять клитики, потом суффикс. Один или два проходов."""
     t = token
@@ -127,29 +130,36 @@ def rule_lemma(token: str) -> str:
     t = strip_suffix(t)
     return t.lower().strip()
 
+
 def is_propn(token: str, prev_was_sentence_end: bool) -> bool:
     """Имя собственное: первая буква заглавная и это не первый токен предложения."""
     if not token:
         return False
     return token[0].isupper() and not prev_was_sentence_end
 
+
 def is_num(token: str) -> bool:
     if PURE_NUMBER.match(token):
         return True
     return token.lower() in NUMERALS_WORDS
 
+
 def is_pron(token: str) -> bool:
     return token.lower() in PRONOUNS
+
 
 # Разбиение на предложения — упрощённое: по `.`, `!`, `?`, `:`, новой строке
 SENT_END = re.compile(r"[.!?]\s+|\n+")
 
+
 def process_text(text: str) -> list:
     """Возвращает список чистых токенов после препроцессинга."""
+
     # pre-clean
     text = WIKI_GARBAGE.sub(" ", text)
     text = NUMSUFFIX.sub(" ", text)
     out = []
+
     # разбиваем на предложения
     sentences = SENT_END.split(text)
     for sent in sentences:
@@ -158,15 +168,19 @@ def process_text(text: str) -> list:
         tokens = TOKENIZER.findall(sent)
         for i, tok in enumerate(tokens):
             if not tok: continue
+
             # 1) числа
             if is_num(tok):
                 out.append("ORDINAL1"); continue
+
             # 2) местоимения
             if is_pron(tok):
                 out.append("PRON1"); continue
+
             # 3) имена собственные (capitalized, not at sentence start)
             if is_propn(tok, prev_was_sentence_end=(i == 0)):
                 out.append("PERSON1"); continue
+
             # 4) обычное слово — лемматизируем по правилам
             lem = rule_lemma(tok)
             if not lem or len(lem) > 40:
@@ -175,6 +189,7 @@ def process_text(text: str) -> list:
                 continue
             out.append(lem)
     return out
+
 
 def collect_plan(shard: int, total: int):
     plan = []
@@ -191,6 +206,7 @@ def collect_plan(shard: int, total: int):
             plan.append((section_name, fp))
     plan = [p for i, p in enumerate(plan) if i % total == shard]
     return plan
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -233,6 +249,7 @@ def main():
     el = time.time() - t0
     print(f"\nL3 shard {args.shard}: done={n_done} words={n_words} elapsed={el/60:.1f}min "
           f"speed={(n_done/el if el>0 else 0):.1f} docs/s")
+
 
 if __name__ == "__main__":
     main()

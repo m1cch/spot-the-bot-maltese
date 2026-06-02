@@ -20,6 +20,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 URL = "https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.mt.300.bin.gz"
 
+
 def download():
     import urllib.request
     out_gz = OUT / "cc.mt.300.bin.gz"
@@ -51,6 +52,7 @@ def download():
     print(f"unzipped: {out_bin}")
     return out_bin
 
+
 def to_npz_subset(bin_path: Path, vocab_words: list, label: str):
     """Для каждого слова в vocab_words достаём FT-вектор и сохраняем npz."""
     import fasttext
@@ -66,6 +68,7 @@ def to_npz_subset(bin_path: Path, vocab_words: list, label: str):
     out = OUT / f"mt_fasttext_{label}_d300.npz"
     np.savez_compressed(out, words=words, vectors=vectors)
     print(f"saved {out} ({out.stat().st_size/1024/1024:.1f} MB)")
+
 
 def main():
     bin_path = download()
@@ -84,6 +87,7 @@ def main():
         words = sorted(words)
         print(f"vocab from {corpus}: {len(words)} unique tokens")
         to_npz_subset(bin_path, words, label)
+
 
 if __name__ == "__main__":
     main()

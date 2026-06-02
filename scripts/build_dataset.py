@@ -31,6 +31,7 @@ DICTS = ROOT / "embeddings" / "svd"
 OUT = ROOT / "datasets"
 OUT.mkdir(parents=True, exist_ok=True)
 
+
 def load_dict(path: Path, m: int):
     """Возвращает (word→index, vectors[:m])."""
     data = np.load(path, allow_pickle=True)
@@ -39,11 +40,13 @@ def load_dict(path: Path, m: int):
     idx = {w: i for i, w in enumerate(words)}
     return idx, vectors
 
+
 def iter_corpus(path: Path):
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
             ws = line.strip().split()
             if ws: yield ws
+
 
 def build_dataset(corpus_path: Path, idx, vectors, n: int, max_rows: int = None):
     m = vectors.shape[1]
@@ -71,6 +74,7 @@ def build_dataset(corpus_path: Path, idx, vectors, n: int, max_rows: int = None)
     print(f"  built: {len(out_rows)}, skipped (OOV): {skipped}")
     return np.asarray(out_rows, dtype=np.float32)
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--corpus", required=True, help="path to all_clean.txt")
@@ -90,6 +94,7 @@ def main():
     out = OUT / f"{args.name}__n{args.n}_m{args.m}.npy"
     np.save(out, data)
     print(f"Saved: {out}")
+
 
 if __name__ == "__main__":
     main()

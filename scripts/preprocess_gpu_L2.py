@@ -54,6 +54,7 @@ PROCLITIC_APOS = ("b'", "f'", "m'", "t'", "s'", "n'", "x'", "ġ'", "ż'", "ċ'",
 DIA = str.maketrans({"ċ":"c", "ġ":"g", "ħ":"h", "ż":"z",
                      "Ċ":"C", "Ġ":"G", "Ħ":"H", "Ż":"Z"})
 
+
 def strip_clitics(word: str):
     wl = word.lower()
     for p in PROCLITIC_APOS:
@@ -64,7 +65,10 @@ def strip_clitics(word: str):
             return word[len(p):], True
     return word, False
 
+
 _LOOKUP = None
+
+
 def get_lookup():
     global _LOOKUP
     if _LOOKUP is None:
@@ -72,6 +76,7 @@ def get_lookup():
             _LOOKUP = json.load(f)
         print(f"[gabra] loaded {len(_LOOKUP)} wordforms")
     return _LOOKUP
+
 
 def custom_lemma(surface: str, stanza_lemma: str | None) -> str:
     lk = get_lookup()
@@ -89,6 +94,7 @@ def custom_lemma(surface: str, stanza_lemma: str | None) -> str:
         if sl: return sl
     return s
 
+
 def normalize_lemma(lemma: str) -> str:
     if not lemma: return ""
     lemma = lemma.lower().strip()
@@ -96,12 +102,14 @@ def normalize_lemma(lemma: str) -> str:
     if not ALPHA_MT_FULL.match(lemma): return ""
     return lemma
 
+
 def pre_clean(text: str) -> str:
     text = WIKI_GARBAGE.sub(" ", text)
     text = NUMSUFFIX.sub(" ", text)
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
 
 def split_to_chunks(text: str):
     text = pre_clean(text)
@@ -126,6 +134,7 @@ def split_to_chunks(text: str):
     if cur: chunks.append(" ".join(cur))
     return chunks
 
+
 def collect_plan(shard: int, total: int):
     plan = []
     for sect, cap in SECTIONS_PRIORITY:
@@ -141,6 +150,7 @@ def collect_plan(shard: int, total: int):
             plan.append((section_name, fp))
     plan = [p for i, p in enumerate(plan) if i % total == shard]
     return plan
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -244,6 +254,7 @@ def main():
     print(f"  lemma sources: gabra={100*stats['from_gabra']/total:.1f}%  "
           f"stanza={100*stats['from_stanza']/total:.1f}%  "
           f"surface={100*stats['from_surface']/total:.1f}%")
+
 
 if __name__ == "__main__":
     main()

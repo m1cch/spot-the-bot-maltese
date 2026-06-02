@@ -27,6 +27,7 @@ from gensim.models import Word2Vec
 
 ROOT = Path(__file__).resolve().parent.parent
 
+
 def load_corpus(corpus_dir: Path):
     """Считать all_clean.shard*.txt или одиночный all_clean.txt — list[list[str]]."""
     shards = sorted(corpus_dir.glob("all_clean.shard*.txt"))
@@ -40,6 +41,7 @@ def load_corpus(corpus_dir: Path):
                 ws = line.strip().split()
                 if ws: sentences.append(ws)
     return sentences
+
 
 def train_save(sents, sg: int, args, out_path: Path):
     print(f"\n[train sg={sg}] dim={args.dim} window={args.window} min_count={args.min_count}")
@@ -58,6 +60,7 @@ def train_save(sents, sg: int, args, out_path: Path):
     vectors = model.wv.vectors.astype(np.float32)
     np.savez_compressed(out_path, words=words, vectors=vectors)
     print(f"  saved {out_path} ({out_path.stat().st_size/1024/1024:.1f} MB)")
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -82,11 +85,13 @@ def main():
     # CBOW
     train_save(sents, sg=0, args=args,
                out_path=out_dir / f"mt_w2v_cbow_{args.label}_d{args.dim}.npz")
+
     # Skipgram
     train_save(sents, sg=1, args=args,
                out_path=out_dir / f"mt_w2v_sg_{args.label}_d{args.dim}.npz")
 
     print(f"\nTotal elapsed: {(time.time()-t0)/60:.1f} min")
+
 
 if __name__ == "__main__":
     main()

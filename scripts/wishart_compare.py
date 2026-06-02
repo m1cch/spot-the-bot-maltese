@@ -133,6 +133,7 @@ def cluster_stats(X, labels):
         "largest_cluster_frac": float(max((v for k, v in sizes.items() if k != 0),
                                           default=0) / len(labels)),
     }
+
     # внутренние меры валидности — только если есть >=2 непустых кластера среди не-шумовых
     if n_clusters >= 2 and real.sum() > n_clusters:
         Xr, Lr = X[real], labels[real]

@@ -49,6 +49,7 @@ SENT_END = re.compile(r"(?<=[.!?:])\s+")
 # Целевая длина одного чанка-предложения (Stanza имеет O(L²) на нём)
 MAX_SENT_CHARS = 1500
 
+
 def pre_clean(text: str) -> str:
     text = WIKI_GARBAGE.sub(" ", text)
     text = NUMSUFFIX.sub(" ", text)
@@ -56,11 +57,13 @@ def pre_clean(text: str) -> str:
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
 
+
 def split_to_chunks(text: str):
     """Разрезаем текст на чанки <= MAX_SENT_CHARS, стараясь не рвать предложения."""
     text = pre_clean(text)
     if not text:
         return []
+
     # сначала по предложениям
     sents = SENT_END.split(text)
     chunks = []
@@ -69,6 +72,7 @@ def split_to_chunks(text: str):
     for s in sents:
         s = s.strip()
         if not s: continue
+
         # если само предложение очень длинное — режем тупо по словам
         if len(s) > MAX_SENT_CHARS:
             words = s.split()
@@ -82,6 +86,7 @@ def split_to_chunks(text: str):
             if piece:
                 chunks.append(" ".join(piece))
             continue
+
         # обычное предложение — добавляем в текущий чанк
         if cur_len + len(s) + 1 > MAX_SENT_CHARS and cur:
             chunks.append(" ".join(cur))
@@ -91,12 +96,14 @@ def split_to_chunks(text: str):
         chunks.append(" ".join(cur))
     return chunks
 
+
 def normalize_lemma(lemma: str) -> str:
     if not lemma: return ""
     lemma = lemma.lower().strip()
     if not lemma or len(lemma) > 40: return ""
     if not ALPHA_MT_FULL.match(lemma): return ""
     return lemma
+
 
 def collect_plan(shard: int, total: int):
     plan = []
@@ -113,6 +120,7 @@ def collect_plan(shard: int, total: int):
             plan.append((section_name, fp))
     plan = [p for i, p in enumerate(plan) if i % total == shard]
     return plan
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -155,9 +163,11 @@ def main():
     findex.write("source\tname\tn_words\n")
 
     pbar = tqdm(total=len(plan), desc=f"L1-shard{args.shard}")
+
     # Группируем файлы в батчи. Один файл = одна строка в выходном all_clean.
     for i in range(0, len(plan), args.batch_docs):
         batch = plan[i:i+args.batch_docs]
+
         # Подготовка списка stanza Document'ов: каждый Document = один чанк
         # Для каждого файла собираем чанки и помним границы.
         chunks_per_file = []
@@ -215,6 +225,7 @@ def main():
     el = time.time() - t0
     print(f"\nL1-full shard {args.shard}: done={n_done} words={n_words} elapsed={el/60:.1f}min "
           f"speed={(n_done/el if el>0 else 0):.2f} docs/s")
+
 
 if __name__ == "__main__":
     main()

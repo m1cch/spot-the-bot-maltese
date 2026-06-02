@@ -40,15 +40,18 @@ BLACKLIST_PATTERNS = [
 ]
 BL_RE = re.compile("|".join(BLACKLIST_PATTERNS), re.IGNORECASE)
 
+
 def fetch_json(url: str):
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read().decode("utf-8"))
 
+
 def fetch_bytes(url: str, timeout: int = 60) -> bytes:
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
+
 
 def archive_org_list():
     """Получаем все 275+ identifier'ов мальтийских текстов."""
@@ -72,6 +75,7 @@ def archive_org_list():
         time.sleep(0.5)
     return items
 
+
 def archive_org_download(items, max_items: int = None):
     """Для каждого identifier: получить список файлов, скачать .txt (или .epub→.txt)."""
     import subprocess
@@ -86,6 +90,7 @@ def archive_org_download(items, max_items: int = None):
         if max_items and ok >= max_items: break
         if BL_RE.search(ident) or BL_RE.search(title or ""):
             skipped += 1; continue
+
         # запрашиваем list files
         url_files = f"https://archive.org/metadata/{ident}/files"
         try:
@@ -94,6 +99,7 @@ def archive_org_download(items, max_items: int = None):
             print(f"  [!] {ident}: meta err {e}")
             continue
         files = data.get("result", []) if isinstance(data, dict) else []
+
         # ищем .txt — самый удобный формат
         txt_file = None
         epub_file = None
@@ -107,6 +113,7 @@ def archive_org_download(items, max_items: int = None):
         chosen = txt_file or epub_file
         if not chosen:
             skipped += 1; continue
+
         # скачиваем
         target = out_dir / f"{ident}.txt"
         if target.exists() and target.stat().st_size > 500:
@@ -126,6 +133,7 @@ def archive_org_download(items, max_items: int = None):
                 for inn in z.namelist():
                     if inn.lower().endswith((".xhtml", ".html", ".htm")):
                         raw = z.read(inn).decode("utf-8", errors="ignore")
+
                         # убрать теги
                         raw = re.sub(r"<[^>]+>", " ", raw)
                         raw = html.unescape(raw)
@@ -138,6 +146,7 @@ def archive_org_download(items, max_items: int = None):
             text = content.decode("utf-8", errors="ignore")
         except Exception:
             text = content.decode("latin-1", errors="ignore")
+
         # минимальный clean
         text = re.sub(r"\s+", " ", text).strip()
         if len(text) < 500:
@@ -150,11 +159,13 @@ def archive_org_download(items, max_items: int = None):
     print(f"archive.org: scanned={n}, saved={ok}, skipped={skipped}")
     return ok
 
+
 def fetch_bible_mt():
     """Качаем USFM/text Bible на мальтийском с ebible.org (CC BY-SA)."""
     print("\n== Bible (mt, ebible.org) ==")
     out_dir = OUT / "bible"
     out_dir.mkdir(parents=True, exist_ok=True)
+
     # ebible.org предоставляет ZIP с USFM-файлами. Для мальтийского:
     # https://ebible.org/Scriptures/mlt_readaloud.zip — Malta Bible (если есть)
     # https://ebible.org/find/details.php?id=mlt
@@ -179,6 +190,7 @@ def fetch_bible_mt():
     print("  no Bible found at standard URLs")
     return None
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--max-archive", type=int, default=None, help="limit archive items")
@@ -199,6 +211,7 @@ def main():
         if sub.is_dir():
             n = len(list(sub.glob("*")))
             print(f"  {sub.name}: {n} files")
+
 
 if __name__ == "__main__":
     main()

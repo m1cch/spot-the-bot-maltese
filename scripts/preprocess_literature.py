@@ -55,12 +55,15 @@ TOKENIZER = re.compile(r"[a-zA-ZċġħżĊĠĦŻ0-9\-']+")
 PURE_NUMBER = re.compile(r"^[\d.,\-]+$")
 
 # ----- helpers (общие) -----
+
+
 def pre_clean(text: str) -> str:
     text = WIKI_GARBAGE.sub(" ", text)
     text = NUMSUFFIX.sub(" ", text)
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
 
 def split_to_chunks(text: str):
     text = pre_clean(text)
@@ -85,6 +88,7 @@ def split_to_chunks(text: str):
     if cur: chunks.append(" ".join(cur))
     return chunks
 
+
 def normalize_lemma(lemma: str) -> str:
     if not lemma: return ""
     lemma = lemma.lower().strip()
@@ -93,6 +97,8 @@ def normalize_lemma(lemma: str) -> str:
     return lemma
 
 # ----- L1: Stanza + neural lemma -----
+
+
 def process_L1(files, batch_docs=16):
     import stanza
     nlp = stanza.Pipeline(lang="mt", processors="tokenize,pos,lemma",
@@ -105,6 +111,8 @@ def process_L1(files, batch_docs=16):
                        lemma_fn=lambda txt, lm: (lm or txt).lower())
 
 # ----- L2: Stanza + Ġabra lookup -----
+
+
 def process_L2(files, batch_docs=16):
     import stanza
     nlp = stanza.Pipeline(lang="mt", processors="tokenize,pos,lemma",
@@ -112,6 +120,7 @@ def process_L2(files, batch_docs=16):
                           tokenize_batch_size=128, pos_batch_size=128, lemma_batch_size=64)
     with open(RES/"mt_lemma_lookup.json","r",encoding="utf-8") as f:
         LK = json.load(f)
+
     def strip_clitics(w):
         wl = w.lower()
         for p in PROCLITIC_APOS:
@@ -119,6 +128,7 @@ def process_L2(files, batch_docs=16):
         for p in ARTICLE_PREFIXES:
             if wl.startswith(p): return w[len(p):], True
         return w, False
+
     def custom_lemma(surface, stanza_lemma):
         s = (surface or "").lower().strip()
         if not s: return ""
@@ -138,13 +148,17 @@ def process_L2(files, batch_docs=16):
     return _run_stanza(nlp, files, out_dir, all_lines_path, batch_docs,
                        lemma_fn=custom_lemma)
 
+
 def _run_stanza(nlp, files, out_dir, all_lines_path, batch_docs, lemma_fn):
     import stanza
     fall = open(all_lines_path, "w", encoding="utf-8")
     n_done = 0; n_words = 0
     pbar = tqdm(total=len(files), desc=out_dir.parent.name)
+
     for i in range(0, len(files), batch_docs):
         batch = files[i:i+batch_docs]
+
+        # собираем чанки по всем файлам батча
         chunks_per_file, flat_texts = [], []
         for fp in batch:
             try:
@@ -156,11 +170,15 @@ def _run_stanza(nlp, files, out_dir, all_lines_path, batch_docs, lemma_fn):
             flat_texts.extend(chs)
         if not flat_texts:
             pbar.update(len(batch)); continue
+
+        # прогоняем весь батч через stanza одним вызовом
         try:
             docs_in = [stanza.Document([], text=t) for t in flat_texts]
             docs_out = nlp(docs_in)
         except Exception as e:
             print(f"\n[!] batch failed: {e}"); pbar.update(len(batch)); continue
+
+        # раскладываем результат обратно по исходным файлам
         cursor = 0
         for fp, n_chunks in chunks_per_file:
             if n_chunks == 0: pbar.update(1); continue
@@ -186,6 +204,8 @@ def _run_stanza(nlp, files, out_dir, all_lines_path, batch_docs, lemma_fn):
     return n_done, n_words
 
 # ----- L3: rule-based -----
+
+
 def process_L3(files):
     def strip_clitics(w):
         wl = w.lower()
@@ -194,12 +214,14 @@ def process_L3(files):
         for p in ARTICLE_PREFIXES:
             if wl.startswith(p): return w[len(p):]
         return w
+
     def strip_suffix(w):
         wl = w.lower()
         for s in HYPHEN_SUFFIXES:
             if wl.endswith(s) and len(wl)-len(s) >= 3:
                 return w[:-len(s)]
         return w
+
     def rule_lemma(tok):
         t = tok
         for _ in range(2): t = strip_clitics(t)
@@ -242,6 +264,7 @@ def process_L3(files):
     fall.close()
     return n_done, n_words
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--variant", required=True, choices=["L1","L2","L3"])
@@ -256,6 +279,7 @@ def main():
     else:
         n, w = process_L3(files)
     print(f"\n{args.variant}: done={n} words={w} elapsed={(time.time()-t0)/60:.1f}min")
+
 
 if __name__ == "__main__":
     main()

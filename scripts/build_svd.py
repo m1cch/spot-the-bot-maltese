@@ -42,6 +42,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 MT_ALPHABET = r"a-zA-ZċġħżĊĠĦŻ"
 TOKEN_PATTERN = rf"[{MT_ALPHABET}0-9\-']+"
 
+
 def load_corpus():
     """Объединить все шарды (если есть) либо взять одиночный all_clean.txt."""
     shards = sorted(CLEAN.glob("all_clean.shard*.txt"))
@@ -57,6 +58,7 @@ def load_corpus():
         raise FileNotFoundError(f"No corpus_clean files found in {CLEAN}")
     with open(single, "r", encoding="utf-8") as f:
         return [line.strip() for line in f if line.strip()]
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -94,8 +96,10 @@ def main():
     if k != args.rank:
         print(f"  rank capped to {k} (matrix is small)")
     print(f"\n[2/3] Truncated SVD (k={k})")
+
     # scipy.sparse.linalg.svds — возвращает в возрастающем порядке σ
     U, s, Vt = svds(A.astype(np.float32), k=k)
+
     # отсортируем по убыванию σ
     order = np.argsort(-s)
     U = U[:, order]
@@ -125,6 +129,7 @@ def main():
     )
     print(f"\n[3/3] Saved: {out_path}")
     print(f"Total elapsed: {(time.time()-t0)/60:.1f} min")
+
 
 if __name__ == "__main__":
     main()

@@ -50,14 +50,17 @@ WIKI_GARBAGE = re.compile(r"[\|\[\]\{\}=*<>#_/\\^~`@$%&]+")
 # px-suffix, hex-colors, etc
 NUMSUFFIX = re.compile(r"\b\d+[a-zA-Z]+\b")
 
+
 def pre_clean(text: str) -> str:
     """Чистим wiki-markup рудименты и явный мусор ДО stanza."""
     text = WIKI_GARBAGE.sub(" ", text)
     text = NUMSUFFIX.sub(" ", text)
+
     # сжать пробелы, оставить переводы строк
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
 
 def normalize_lemma(lemma: str) -> str:
     """Разрешаем только буквы (с мальт. диакритиками), дефис, апостроф. Иначе токен — мусор."""
@@ -69,6 +72,7 @@ def normalize_lemma(lemma: str) -> str:
     if not ALPHA_MT_FULL.match(lemma):
         return ""
     return lemma
+
 
 def collect_plan(shard: int = 0, total: int = 1):
     plan = []
@@ -83,9 +87,11 @@ def collect_plan(shard: int = 0, total: int = 1):
         section_name = sect.replace("/", "_")
         for fp in files:
             plan.append((section_name, fp))
+
     # шардинг: каждый процесс берёт каждую total-ю запись со смещением shard
     plan = [p for i, p in enumerate(plan) if i % total == shard]
     return plan
+
 
 def chunk_text(text: str, max_chars: int = 10000):
     if len(text) <= max_chars:
@@ -97,6 +103,7 @@ def chunk_text(text: str, max_chars: int = 10000):
         buf.append(para); cur += len(para) + 2
     if buf: chunks.append("\n\n".join(buf))
     return chunks
+
 
 def process_doc(nlp, text: str):
     text = pre_clean(text)
@@ -115,6 +122,7 @@ def process_doc(nlp, text: str):
                 tok = normalize_lemma(w.lemma or w.text)
                 if tok: out_words.append(tok)
     return out_words
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -177,6 +185,7 @@ def main():
     el = time.time() - t0
     print(f"\nshard {args.shard}: done={n_done} words={n_words_total} elapsed={el/60:.1f}min "
           f"speed={(n_done/el) if el>0 else 0:.2f} docs/s")
+
 
 if __name__ == "__main__":
     main()

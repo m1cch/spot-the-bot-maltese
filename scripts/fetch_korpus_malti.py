@@ -32,9 +32,11 @@ SECTIONS = [
 MIN_CHARS = 500
 SAFE = re.compile(r"[^\w\-\.() ]+", flags=re.UNICODE)
 
+
 def safe_name(s: str) -> str:
     n = SAFE.sub("_", s).strip().strip(".")
     return n[:120] or "doc"
+
 
 def write_section(section: str):
     out = OUT_ROOT / section
@@ -47,6 +49,7 @@ def write_section(section: str):
     skipped = 0
     for i, row in enumerate(tqdm(ds, desc=section)):
         text_field = row.get("text")
+
         # text может быть list[str] (sentences) или str
         if isinstance(text_field, list):
             body = " ".join(t for t in text_field if t)
@@ -55,6 +58,7 @@ def write_section(section: str):
         body = re.sub(r"\s+", " ", body).strip()
         if len(body) < MIN_CHARS:
             skipped += 1; continue
+
         # имя: пробуем metadata, иначе индекс
         meta_keys = [k for k in row.keys() if k != "text"]
         title = None
@@ -71,6 +75,7 @@ def write_section(section: str):
     print(f"  wrote: {written}, skipped: {skipped}")
     return written, skipped
 
+
 def main():
     totals = {}
     for sec in SECTIONS:
@@ -82,6 +87,7 @@ def main():
     print("\n=== SUMMARY ===")
     for sec, (w, s) in totals.items():
         print(f"  {sec:18s}  written={w:>8d}  skipped={s:>8d}")
+
 
 if __name__ == "__main__":
     main()

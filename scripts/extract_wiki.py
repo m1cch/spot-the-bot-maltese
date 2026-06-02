@@ -23,9 +23,12 @@ MIN_LEN = 500
 
 # Безопасное имя файла
 SAFE = re.compile(r"[^\w\-\.() ]+", flags=re.UNICODE)
+
+
 def safe_name(title: str) -> str:
     name = SAFE.sub("_", title).strip().strip(".")
     return name[:150] or "untitled"
+
 
 def iter_pages(path: Path):
     """Yield (title, text) для каждой статьи main namespace."""
@@ -57,18 +60,22 @@ def iter_pages(path: Path):
                 yield title, text
             el.clear()
 
+
 def clean_wikitext(wikitext: str) -> str:
     """Снять разметку, оставить плоский текст."""
     code = mwparserfromhell.parse(wikitext)
+
     # удалить шаблоны и ссылки на файлы
     for tpl in code.filter_templates():
         try: code.remove(tpl)
         except Exception: pass
     text = code.strip_code(normalize=True, collapse=True)
+
     # Прибрать множественные пробелы и пустые строки
     text = re.sub(r"\n{3,}", "\n\n", text)
     text = re.sub(r"[ \t]+", " ", text)
     return text.strip()
+
 
 def main():
     written = 0
@@ -86,6 +93,7 @@ def main():
         if len(text) < MIN_LEN:
             skipped += 1; continue
         name = safe_name(title)
+
         # коллизии имён
         candidate = name
         i = 2
@@ -97,6 +105,7 @@ def main():
         if written % 200 == 0:
             pbar.set_postfix(written=written, skipped=skipped)
     print(f"\nDone. Written: {written}, skipped: {skipped}. Out: {OUT}")
+
 
 if __name__ == "__main__":
     main()

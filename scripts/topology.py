@@ -82,6 +82,7 @@ def analyse(X, points, runs, maxdim, min_persistence, seed):
         dgms = persistence(sub.astype(np.float32), maxdim)
         last_dgms = dgms
         runs_stats.append(diagram_stats(dgms, min_persistence))
+
     # усреднение по запускам
     avg = {}
     for dim_key in runs_stats[0]:

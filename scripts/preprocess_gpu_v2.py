@@ -58,15 +58,18 @@ ARTICLE_PREFIXES = [
 ]
 PROCLITIC_APOS = ["b'", "f'", "m'", "t'", "s'", "n'", "x'", "ġ'"]
 
+
 def strip_clitics(word: str):
     """Снять артикли и проклитики. Возвращает (stripped, was_modified)."""
     w = word
     changed = False
+
     # сначала проклитики с апострофом
     for p in PROCLITIC_APOS:
         if w.lower().startswith(p):
             w = w[len(p):]
             changed = True; break
+
     # потом артикли с дефисом
     for p in ARTICLE_PREFIXES:
         if w.lower().startswith(p):
@@ -74,11 +77,14 @@ def strip_clitics(word: str):
             changed = True; break
     return w, changed
 
+
 DIA = str.maketrans({"ċ":"c", "ġ":"g", "ħ":"h", "ż":"z",
                      "Ċ":"C", "Ġ":"G", "Ħ":"H", "Ż":"Z"})
 
 # Загрузим Ġabra-lookup
 _LOOKUP = None
+
+
 def get_lookup():
     global _LOOKUP
     if _LOOKUP is None:
@@ -88,32 +94,39 @@ def get_lookup():
         print(f"[gabra] loaded {len(_LOOKUP)} wordforms")
     return _LOOKUP
 
+
 def custom_lemma(surface: str, stanza_lemma: str | None = None) -> str:
     """Наш собственный лемматизатор: Ġabra + правила, fallback на Stanza."""
     lk = get_lookup()
     s = surface.lower().strip()
     if not s:
         return ""
+
     # 1) прямой lookup
     if s in lk:
         return lk[s]
+
     # 2) lookup без диакритик (lookup уже содержит такие ключи, но на всякий)
     s_nd = s.translate(DIA)
     if s_nd in lk:
         return lk[s_nd]
+
     # 3) снимаем артикль/проклитику и пробуем ещё раз
     stripped, changed = strip_clitics(s)
     if changed and stripped in lk:
         return lk[stripped]
     if changed and stripped.translate(DIA) in lk:
         return lk[stripped.translate(DIA)]
+
     # 4) Stanza-лемма
     if stanza_lemma:
         sl = stanza_lemma.lower().strip()
         if sl:
             return sl
+
     # 5) сама форма
     return s
+
 
 def normalize_lemma(lemma: str) -> str:
     if not lemma:
@@ -125,12 +138,14 @@ def normalize_lemma(lemma: str) -> str:
         return ""
     return lemma
 
+
 def pre_clean(text: str) -> str:
     text = WIKI_GARBAGE.sub(" ", text)
     text = NUMSUFFIX.sub(" ", text)
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
 
 def chunk_text(text: str, max_chars: int = 10000):
     if len(text) <= max_chars:
@@ -142,6 +157,7 @@ def chunk_text(text: str, max_chars: int = 10000):
         buf.append(para); cur += len(para) + 2
     if buf: chunks.append("\n\n".join(buf))
     return chunks
+
 
 def process_doc(nlp, text: str, stats: dict):
     text = pre_clean(text)
@@ -157,8 +173,10 @@ def process_doc(nlp, text: str, stats: dict):
                 if up in POS_DROP: continue
                 if up in POS_REPLACE:
                     out_words.append(POS_REPLACE[up]); continue
+
                 # custom lemmatizer
                 lem = custom_lemma(w.text, w.lemma)
+
                 # отчёт — какой ярус сработал
                 if lem == w.text.lower():
                     stats["from_surface"] += 1
@@ -169,6 +187,7 @@ def process_doc(nlp, text: str, stats: dict):
                 tok = normalize_lemma(lem)
                 if tok: out_words.append(tok)
     return out_words
+
 
 def collect_plan(shard: int, total: int):
     plan = []
@@ -185,6 +204,7 @@ def collect_plan(shard: int, total: int):
             plan.append((section_name, fp))
     plan = [p for i, p in enumerate(plan) if i % total == shard]
     return plan
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -243,6 +263,7 @@ def main():
     print(f"lemma sources: gabra={stats['from_gabra']} ({100*stats['from_gabra']/total:.1f}%) "
           f"stanza={stats['from_stanza']} ({100*stats['from_stanza']/total:.1f}%) "
           f"surface={stats['from_surface']} ({100*stats['from_surface']/total:.1f}%)")
+
 
 if __name__ == "__main__":
     main()
